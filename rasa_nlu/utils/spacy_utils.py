@@ -1,6 +1,7 @@
 import logging
 import typing
 from typing import Any, Dict, List, Optional, Text
+import re
 
 from rasa_nlu.components import Component
 from rasa_nlu.config import RasaNLUModelConfig
@@ -32,6 +33,8 @@ class SpacyNLP(Component):
         # between these two words, therefore setting this to `True`.
         "case_sensitive": False,
     }
+
+    punctuation_regex = re.compile(r'[\s\+\-\!\.\?]+$')
 
     def __init__(self,
                  component_config: Dict[Text, Any] = None,
@@ -78,6 +81,7 @@ class SpacyNLP(Component):
         return {"spacy_nlp": self.nlp}
 
     def doc_for_text(self, text: Text) -> 'Doc':
+        text = self.punctuation_regex.sub('', text)
         if self.component_config.get("case_sensitive"):
             return self.nlp(text)
         else:
